@@ -2,6 +2,8 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <map>
+#include <set>
 
 using namespace std;
 
@@ -174,15 +176,287 @@ void ToDoList() {
 	}
 }
 
-int main() {
+std::map<char, int> BuildCharCounters(const std::string &str) {
+	std::map<char, int> charCounters;
+	for (const char &ch: str) {
+		++charCounters[ch];
+	}
+	return charCounters;
+}
+
+void Anagrams() {
+	int N = 0;
+	cin >> N;
+
+	for (int i = 0; i < N; i++) {
+		std::string str1;
+		std::string str2;
+		cin >> str1 >> str2;
+		if (BuildCharCounters(str1) == BuildCharCounters(str2)) {
+			cout << "YES" << endl;
+		} else {
+			cout << "NO" << endl;
+		}
+	}
+}
+
+void DirectoryCapitals() {
+	int N = 0;
+	cin >> N;
+	map<string, string> capitalCountry;
+
+	for (int i = 0; i < N; i++) {
+		string operation;
+		cin >> operation;
+
+		if (operation == "CHANGE_CAPITAL") {
+			string country;
+			string new_capital;
+			cin >> country >> new_capital;
+			if (capitalCountry.count(country) == 0) {
+				cout << "Introduce new country " << country
+					 << " with capital " << new_capital << endl;
+			} else if (capitalCountry[country] == new_capital) {
+				cout << "Country " << country << " hasn't changed its capital" << endl;
+			} else {
+				cout << "Country " << country
+					 << " has changed its capital from "
+					 << capitalCountry[country] << " to " << new_capital << endl;
+			}
+
+			capitalCountry[country] = new_capital;
+		} else if (operation == "RENAME") {
+			string old_country_name;
+			string new_country_name;
+			cin >> old_country_name >> new_country_name;
+			if (old_country_name == new_country_name ||
+					capitalCountry.count(old_country_name) == 0 ||
+					capitalCountry.count(new_country_name) != 0) {
+				cout << "Incorrect rename, skip" << endl;
+			} else {
+				string t_capital = capitalCountry[old_country_name];
+				cout << "Country " << old_country_name << " with capital "
+					 << t_capital << " has been renamed to " << new_country_name << endl;
+				capitalCountry.erase(old_country_name);
+				capitalCountry[new_country_name] = t_capital;
+			}
+		} else if (operation == "ABOUT") {
+			string country ;
+			cin >> country;
+			if (capitalCountry.count(country) == 0) {
+				cout << "Country " << country << " doesn't exist" << endl;
+			} else {
+				cout << "Country " << country << " has capital "
+					 << capitalCountry[country] << endl;
+			}
+		} else if (operation == "DUMP") {
+			if (capitalCountry.size() == 0) {
+				cout << "There are no countries in the world" << endl;
+			} else {
+				for (auto t: capitalCountry) {
+					cout << t.first << "/" << t.second << " ";
+				}
+				cout << endl;
+			}
+		} else {
+			cout << "Error: 002";
+		}
+	}
+}
+
+void BusStation1() {
+	int N = 0;
+	cin >> N;
+	map<string, vector<string>> busStation; // Автобус[остановки]
+	map<string, vector<string>> subSequenceBus; // Остановка[автобусы]
+
+	for (int i = 0; i < N; i++) {
+		string operation;
+		cin >> operation;
+
+		if (operation == "NEW_BUS") {
+			string bus;
+			int stopCount = 0;
+			cin >> bus >> stopCount;
+			for (int i = 0; i < stopCount; i++) {
+				string stopStation;
+				cin >> stopStation;
+				busStation[bus].push_back(stopStation);
+				subSequenceBus[stopStation].push_back(bus);
+			}
+		} else if (operation == "BUSES_FOR_STOP") {
+			// вывести названия всех маршрутов автобуса, проходящих через остановку stop
+			string stopStation;
+			cin >> stopStation;
+			if (subSequenceBus.count(stopStation) == 0) {
+				cout << "No stop" << endl;
+				continue;
+			} else {
+				for (string busName: subSequenceBus[stopStation]) {
+					cout << busName << " ";
+				}
+				cout << endl;
+			}
+		} else if (operation == "STOPS_FOR_BUS") {
+			string bus;
+			cin >> bus;
+			// вывести названия всех остановок маршрута bus со списком автобусов,
+			// на которые можно пересесть на каждой из остановок
+			if (busStation.count(bus) == 0) {
+				cout << "No bus" << endl;
+			} else {
+				const vector<string> &stops = busStation[bus];
+				for (int i = 0; i < stops.size(); i++) {
+					cout << "Stop " << stops[i] << ": " << endl;
+					const vector<string> &busesForStop = subSequenceBus[stops[i]];
+					if (busesForStop.size() == 1) {
+						cout << "no interchange" << endl;
+					} else {
+						for (int j = 0; j < busesForStop.size(); j++) {
+							if (busesForStop[j] != bus) {
+								cout << busesForStop[j] << " ";
+							}
+						}
+					}
+					cout << endl;
+				}
+			}
+		} else {
+			// ALL_BUSES - вывести список всех маршрутов с остановками.
+			if (busStation.size() == 0) {
+				cout << "No buses" << endl;
+				continue;
+			}
+			for (auto my_pair: busStation) {
+				const vector<string> &stops = my_pair.second;
+				cout << "Bus " << my_pair.first << ": ";
+				for (string stop: stops) {
+					cout << stop << " ";
+				}
+				cout << endl;
+			}
+		}
+	}
+}
+
+void BusStation2() {
+	int N = 0;
+	cin >> N;
+	map<vector<string>, int> busInfo; // busInfo[Остановки] = номер автобуса
+	int currId = 1;
+
+	for (int i = 0; i < N; i++) {
+		int numOperation;
+		cin >> numOperation;
+		vector<string> busStation;
+
+		for (int j = 0; j < numOperation; j++) {
+			string str;
+			cin >> str;
+			busStation.push_back(str);
+		}
+
+		if (busInfo.count(busStation) == 0) {
+			busInfo[busStation] = currId;
+			cout << "New bus " << currId++ << endl;
+		} else {
+			cout << "Already exists for " << busInfo[busStation] << endl;
+		}
+	}
+}
+
+void UniqueStr() {
+	int N = 0;
+	cin >> N;
+	set<string> uniqueStr;
+	for (int i = 0; i < N; i++) {
+		string str;
+		cin >> str;
+		uniqueStr.insert(str);
+	}
+	cout << uniqueStr.size();
+}
+
+set<string> BuildMapValuesSet(const map<int, string>& m) {
+	set<string> retSet;
+	for (auto my_pair: m) {
+		retSet.insert(my_pair.second);
+	}
+	return retSet;
+}
+
+void Synonyms() {
+	int N = 0;
+	cin >> N;
+	map<string, set<string>> sinonyms;
+
+	for (int i = 0; i < N; i++) {
+		string operation;
+		cin >> operation;
+
+		if (operation == "ADD") {
+			string word1, word2;
+			cin >> word1 >> word2;
+			sinonyms[word1].insert(word2);
+			sinonyms[word2].insert(word1);
+		} else if (operation == "COUNT") {
+			string word;
+			cin >> word;
+			cout << sinonyms[word].size() << endl;
+		} else if (operation == "CHECK") {
+			string word1, word2;
+			cin >> word1 >> word2;
+			if (sinonyms.count(word1) != 0 && sinonyms[word1].count(word2) != 0) {
+				cout << "YES" << endl;
+			} else {
+				cout << "NO" << endl;
+			}
+		}
+	}
+}
+
+void setBusStation() {
+	int N = 0;
+	cin >> N;
+	map<set<string>, int> busInfo; // busInfo[Остановки] = номер автобуса
+	int currId = 1;
+
+	for (int i = 0; i < N; i++) {
+		int numOperation;
+		cin >> numOperation;
+		set<string> busStation;
+
+		for (int j = 0; j < numOperation; j++) {
+			string str;
+			cin >> str;
+			busStation.insert(str);
+		}
+
+		if (busInfo.count(busStation) == 0) {
+			busInfo[busStation] = currId;
+			cout << "New bus " << currId++ << endl;
+		} else {
+			cout << "Already exists for " << busInfo[busStation] << endl;
+		}
+	}
+}
+
+//int main() {
 //	AverageTemperature();
 //	QueuePeople();
 //	ToDoList();
+//	Anagrams();
+//	DirectoryCapitals();
+//	BusStation1();
+//	BusStation2();
+//	UniqueStr();
+//	Synonyms();
+//	setBusStation();
 
     // std::cout << Factorial(0);
     // std::string t_str;
     // std::cin >> t_str;
 //    std::cout << "34324";
 
-    return 0;
-}
+//    return 0;
+//}
