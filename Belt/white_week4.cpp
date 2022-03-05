@@ -135,28 +135,96 @@ void WorkingWithFiles() {
 }
 
 void ConclusionWithPrecision() {
+//	ifstream input("C:\\Users\\Pakula\\Documents\\1__PROJECT\\STUDY_Cplusplus\\Belt\\input.txt");
 	ifstream input("input.txt");
 	double line;
 	string str;
 	cout << fixed << setprecision(3);
 	while(getline(input, str)) {
-		input >> line;
+		line = atof(str.c_str());
 		cout << line << endl;
 	}
 }
 
 void ReadingAndDisplaying() {
-//	ifstream input("input.txt");
-//	string line;
-//	cout << setprecision(3);
-//	while(getline(input, line)) {
-//		cout << line << endl;
-//	}
+	ifstream input("input.txt");
+	string lines;
+	int N, M;
+	input >> N >> M;
+	input.ignore(1);
+	for (int i = N; i > 0;--i) {
+		for (int z = M; z > 1; --z) {
+			getline(input, lines, ',');
+			cout << setw(10) << lines << " ";
+		}
+		getline(input, lines);
+		cout << setw(10) << lines << endl;
+	}
 }
 
-int main() {
+struct Student {
+//	Student(){
+//		cin >> firstName >> lastName >> dayBH >> monthBH >> yearBH;
+//	}
+	string firstName;
+	string lastName;
+	int dayBH;
+	int monthBH;
+	int yearBH;
+};
+
+void StudentsList() {
+	int N = 0;
+	cin >> N;
+	vector<Student> students(N);
+
+	for (Student& student : students) {
+		string firstName;
+		string lastName;
+		int dayBH;
+		int monthBH;
+		int yearBH;
+		cin >> firstName >> lastName >> dayBH >> monthBH >> yearBH;
+		student = {firstName, lastName, dayBH, monthBH, yearBH};
+	}
+
+	cin >> N;
+	for (int i = 0; i < N; i++) {
+		string operation;
+		cin >> operation;
+		int K = 0;
+		cin >> K;
+		K += -1;
+		if (operation == "name" && K < students.size()) {
+			cout << students[K].firstName << " " << students[K].lastName;
+		} else if (operation == "date" && K < students.size()) {
+			cout << students[K].dayBH << "."
+				 << students[K].monthBH << "." << students[K].yearBH;
+		} else {
+			cout << "bad request";
+		}
+		cout << endl;
+	}
+}
+
+void EnsureEqual(const string& left, const string& right) {
+	if (left != right) {
+		throw std::runtime_error(string(left + " != " + right));
+	}
+}
+
+//int main() {
+
+//	try {
+//		EnsureEqual("C++ White", "C++ White");
+//		EnsureEqual("C++ White", "C++ Yellow");
+//	  } catch (runtime_error& e) {
+//		cout << e.what() << endl;
+//	  }
+
+//	StudentsList();
 //	ReadingAndDisplaying();
-	ConclusionWithPrecision();
+//	ConclusionWithPrecision();
 //	WorkingWithFiles();
 //	Image image = {10, 2, 6};
 //	Params params = {4, 2, 6};
@@ -168,5 +236,5 @@ int main() {
 //		Course("White belt"),
 //		Week("4th")
 //	);
-	return 0;
-}
+//	return 0;
+//}
